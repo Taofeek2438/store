@@ -1,19 +1,28 @@
 package com.codewithtaofeek.store;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
 public class HomeController {
-    @Value("${spring.application.name}")
-    private String appName;
 
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
-    @RequestMapping("/")
-    public String index() {
-        System.out.println("appName: " + appName);
-        return "index.html";
+    @PostMapping("/login")
+    public String login(@RequestBody LoginRequest request) {
+        UsernamePasswordAuthenticationToken token =
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword());
+
+        try {
+            Authentication auth = authenticationManager.authenticate(token);
+            System.out.println(request.getPassword());
+            return "Login successful for user: " + auth.getName();
+        } catch (AuthenticationException e) {
+            return "Login failed: " + e.getMessage();
+        }
     }
-
 }
